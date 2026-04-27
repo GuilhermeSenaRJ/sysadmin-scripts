@@ -2,8 +2,8 @@
 # ============================================================
 # zabbix_manutencao.sh
 # Manutenção preventiva do servidor Zabbix (Ubuntu/Debian)
-# Autor: Guilherme Sena | FUNARJ - SSTI
-# Srv04 - 10.9.64.9
+# Autor: SysAdmin
+# SrvMon - 192.168.1.21
 # ============================================================
 
 set -euo pipefail

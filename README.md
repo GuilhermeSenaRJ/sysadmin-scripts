@@ -45,6 +45,6 @@ bash /opt/scripts/zabbix_manutencao.sh
 
 ## Sobre
 
-Scripts criados por **Guilherme Sena** durante a gestão de infraestrutura de TI da **FUNARJ — Fundação Anita Mantuano de Artes do Estado do RJ**, cobrindo 17 sites e ~500 usuários.
+Scripts criados por **SysAdmin Author** durante a gestão de infraestrutura de TI da **Company — Fundação Anita Mantuano de Artes do Estado do RJ**, cobrindo 17 sites e ~500 usuários.
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-guilhermefelipe82-blue)](https://linkedin.com/in/guilhermefelipe82)

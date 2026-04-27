@@ -1,15 +1,15 @@
 # ============================================================
 # dhcp-export-import.ps1
 # Migração de escopo DHCP entre servidores Windows
-# Cenário: DC 2008 R2 (10.9.64.2) -> DCS1 (10.9.64.4)
-# Autor: Guilherme Sena | FUNARJ - SSTI
+# Cenário: DC 2008 R2 (192.168.1.10) -> SERVER2 (192.168.1.11)
+# Autor: SysAdmin
 # ============================================================
 
 param(
     [ValidateSet("export","import","verify")]
     [string]$Mode = "verify",
-    [string]$ServidorOrigem  = "10.9.64.2",
-    [string]$ServidorDestino = "10.9.64.4",
+    [string]$ServidorOrigem  = "192.168.1.10",
+    [string]$ServidorDestino = "192.168.1.11",
     [string]$ArquivoExport   = "C:\Scripts\dhcp_export.xml"
 )
 
@@ -52,7 +52,7 @@ switch ($Mode) {
             Log "OK: servico DHCP iniciado em $ServidorDestino"
 
             # Autoriza o novo servidor no AD
-            Add-DhcpServerInDC -DnsName "dcs1.funarj.br" -IPAddress $ServidorDestino
+            Add-DhcpServerInDC -DnsName "dc2.company.local" -IPAddress $ServidorDestino
             Log "OK: servidor autorizado no AD"
 
             # Pausa o DHCP no servidor antigo para evitar conflito

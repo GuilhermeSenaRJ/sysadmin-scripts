@@ -1,10 +1,10 @@
 # ============================================================
 # Export-VM-Backup.ps1
 # Backup automatizado de VMs Hyper-V para share de rede
-# Autor: Guilherme Sena | FUNARJ - SSTI
+# Autor: SysAdmin
 # ============================================================
 
-$destino   = "\\dc\ATI\backup servidor VHD\SEDE\DCS1"
+$destino   = "\\fileserver\Backups\VMs"   # Altere para o caminho do seu servidor de backup
 $data      = Get-Date -Format "yyyy-MM-dd"
 $log       = "C:\Scripts\backup_$data.log"
 $retencao  = 7
@@ -19,9 +19,9 @@ function Log($msg) {
 Log "=== INICIO BACKUP ==="
 
 $vms = @(
-    @{ Nome = "Srv03 - glpi";                Pasta = "GLPI"   },
-    @{ Nome = "Srv04 - Zabbix";              Pasta = "Zabbix" },
-    @{ Nome = "Srv02 - Gestor de Patrimonio"; Pasta = "Gestor" }
+    @{ Nome = "SrvApp - glpi";                Pasta = "GLPI"   },
+    @{ Nome = "SrvMon - Zabbix";              Pasta = "Zabbix" },
+    @{ Nome = "SrvApp2 - Gestor de Patrimonio"; Pasta = "Gestor" }
 )
 
 foreach ($vm in $vms) {

@@ -1,8 +1,8 @@
 # ============================================================
 # check-ad-health.ps1
-# Diagnóstico de saúde do Active Directory - FUNARJ
-# Autor: Guilherme Sena | FUNARJ - SSTI
-# Domínio: funarj.br | DCs: DC (2008R2), DCS1 (2016), SRVFUNARJAD01 (2022)
+# Diagnóstico de saúde do Active Directory - Company
+# Autor: SysAdmin
+# Domínio: company.local | DCs: DC (2008R2), SERVER2 (2016), SRVCompanyAD01 (2022)
 # ============================================================
 
 param(
@@ -19,7 +19,7 @@ function Write-Check($test, $status, $detail = "") {
     $script:report += [PSCustomObject]@{ Teste = $test; Status = $status; Detalhe = $detail }
 }
 
-Write-Host "`n=== DIAGNOSTICO AD - FUNARJ ===" -ForegroundColor Cyan
+Write-Host "`n=== DIAGNOSTICO AD - Company ===" -ForegroundColor Cyan
 Write-Host "Data: $(Get-Date)" -ForegroundColor Gray
 
 # 1. Replicacao AD
@@ -58,10 +58,10 @@ else { Write-Check "Share NETLOGON" "ERRO" "Share nao encontrado" }
 # 4. DNS - resolucao interna
 Write-Host "`n[4] Verificando DNS..." -ForegroundColor White
 try {
-    $dns = Resolve-DnsName -Name "funarj.br" -Server "10.9.64.2" -ErrorAction Stop
-    Write-Check "DNS resolucao funarj.br" "OK" $dns[0].IPAddress
+    $dns = Resolve-DnsName -Name "company.local" -Server "192.168.1.10" -ErrorAction Stop
+    Write-Check "DNS resolucao company.local" "OK" $dns[0].IPAddress
 } catch {
-    Write-Check "DNS resolucao funarj.br" "ERRO" $_.Exception.Message
+    Write-Check "DNS resolucao company.local" "ERRO" $_.Exception.Message
 }
 
 # 5. FSMO Roles
