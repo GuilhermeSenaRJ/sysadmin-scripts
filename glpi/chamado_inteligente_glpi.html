@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empresa Exemplo · Abrir Chamado Rápido</title>
+<style>
+  :root {
+    --bg: #0f111a;
+    --surface: #161824;
+    --surface2: #1e2132;
+    --surface3: #252840;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6366f1;
+    --accent-glow: rgba(99,102,241,0.35);
+    --accent2: #22d3ee;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --radius: 14px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background animated grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app-wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(22,24,36,0.85);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  header h1 {
+    font-size: 16px; font-weight: 600;
+    color: var(--text);
+    letter-spacing: -.2px;
+  }
+  header p { font-size: 12px; color: var(--muted); }
+
+  .header-badge {
+    margin-left: auto;
+    background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(34,211,238,.08));
+    border: 1px solid rgba(99,102,241,.25);
+    color: #a5b4fc;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* ── Main layout ── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 32px 24px;
+    gap: 28px;
+  }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  /* ── Left panel: Chat ── */
+  .chat-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .chat-header {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    line-height: 1.2;
+  }
+  .chat-header span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .chat-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Chat messages */
+  .chat-history {
+    flex: 1;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    max-height: 300px;
+    padding: 4px 2px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface3) transparent;
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    animation: fadeSlide .3s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0; font-weight: 600;
+    background: var(--surface3);
+  }
+  .msg.user .msg-avatar {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    font-size: 12px;
+    color: white;
+  }
+
+  .msg-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    border-top-left-radius: 4px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    max-width: 78%;
+  }
+  .msg.user .msg-bubble {
+    background: linear-gradient(135deg, rgba(99,102,241,.2), rgba(34,211,238,.08));
+    border-color: rgba(99,102,241,.25);
+    border-top-right-radius: 4px;
+    border-top-left-radius: 16px;
+    text-align: right;
+  }
+
+  .msg-bubble.thinking {
+    color: var(--muted);
+    font-style: italic;
+  }
+  .thinking-dots span {
+    display: inline-block;
+    animation: blink 1.2s infinite;
+  }
+  .thinking-dots span:nth-child(2) { animation-delay: .2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink {
+    0%,80%,100% { opacity: .2; }
+    40% { opacity: 1; }
+  }
+
+  /* Chat input */
+  .chat-input-wrap {
+    display: flex;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    transition: border-color .2s;
+  }
+  .chat-input-wrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  #userInput {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    line-height: 1.5;
+    max-height: 120px;
+    min-height: 24px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  #userInput::placeholder { color: var(--muted); }
+
+  .send-btn {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), #818cf8);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s, box-shadow .15s;
+    flex-shrink: 0;
+    align-self: flex-end;
+  }
+  .send-btn:hover { transform: scale(1.07); box-shadow: 0 0 14px var(--accent-glow); }
+  .send-btn svg { width: 16px; height: 16px; fill: white; }
+
+  /* Tips */
+  .quick-tips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .tip:hover {
+    border-color: var(--accent);
+    color: #a5b4fc;
+    background: rgba(99,102,241,.08);
+  }
+
+  /* ── Right panel: Ticket Form ── */
+  .ticket-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -.1px;
+  }
+  .card-head .icon {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .card-head .icon.purple { background: rgba(99,102,241,.15); }
+  .card-head .icon.cyan { background: rgba(34,211,238,.12); }
+  .card-head .icon.green { background: rgba(16,185,129,.12); }
+  .card-head .icon.amber { background: rgba(245,158,11,.12); }
+
+  .card-body { padding: 16px 18px; }
+
+  /* Form fields */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--muted);
+  }
+
+  input[type="text"], textarea, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  textarea { resize: none; line-height: 1.6; min-height: 100px; }
+
+  select option { background: #1e2132; }
+
+  /* ITIL taAdmin grid */
+  .itil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .itil-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* Badge selectors */
+  .badge-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .badge-opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all .15s;
+    background: var(--surface2);
+  }
+  .badge-opt:hover { border-color: var(--accent); background: rgba(99,102,241,.06); }
+  .badge-opt.selected { border-color: var(--accent); background: rgba(99,102,241,.15); color: #a5b4fc; }
+
+  .badge-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* Severity visual */
+  .severity-bar {
+    height: 3px;
+    border-radius: 2px;
+    margin-top: 4px;
+    transition: width .4s ease;
+  }
+
+  /* Status panel */
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .status-dot.green { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .status-dot.amber { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+  .status-dot.gray { background: var(--muted); }
+
+  .requester-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 9px;
+    border: 1px solid rgba(99,102,241,.2);
+    font-size: 12.5px;
+  }
+  .req-avatar {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: white; font-weight: 700; flex-shrink: 0;
+  }
+  .req-info { flex: 1; line-height: 1.4; }
+  .req-name { color: var(--text); font-size: 12.5px; }
+  .req-role { color: var(--muted); font-size: 10px; }
+  .req-badge {
+    background: rgba(99,102,241,.15);
+    border: 1px solid rgba(99,102,241,.25);
+    color: #a5b4fc;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  /* Submit button */
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+    border: none;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.1), transparent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .submit-btn:hover::before { opacity: 1; }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 25px var(--accent-glow); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ── Searchable Location Combobox ── */
+  .loc-wrap { position: relative; }
+
+  .loc-input-row {
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 0 10px 0 12px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .loc-input-row:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  #locSearch {
+    background: none; border: none; outline: none;
+    color: var(--text); font-size: 13px; font-family: var(--font);
+    padding: 10px 0; flex: 1; width: 100%;
+  }
+  #locSearch::placeholder { color: var(--muted); }
+
+  .loc-clear {
+    background: none; border: none; color: var(--muted);
+    font-size: 18px; cursor: pointer; padding: 0 2px;
+    line-height: 1; flex-shrink: 0;
+  }
+  .loc-clear:hover { color: var(--text); }
+
+  .loc-dropdown {
+    display: none;
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+    background: #1a1c2e;
+    border: 1px solid rgba(99,102,241,.3);
+    border-radius: 10px; max-height: 220px; overflow-y: auto;
+    z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    scrollbar-width: thin; scrollbar-color: var(--surface3) transparent;
+  }
+  .loc-dropdown.open { display: block; }
+
+  .loc-opt {
+    padding: 9px 14px; font-size: 12.5px; cursor: pointer;
+    transition: background .1s; display: flex; align-items: center;
+    gap: 8px; color: var(--text);
+  }
+  .loc-opt:hover, .loc-opt.active { background: rgba(99,102,241,.15); }
+  .loc-opt .loc-badge {
+    font-size: 10px; background: rgba(99,102,241,.12); color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,.2); border-radius: 4px;
+    padding: 1px 6px; flex-shrink: 0;
+  }
+  .loc-opt .loc-name { font-weight: 500; flex: 1; }
+  .loc-opt .loc-full { font-size: 10.5px; color: var(--muted); }
+  .loc-opt.no-result { color: var(--muted); cursor: default; font-style: italic; padding: 10px 14px; }
+  .loc-opt.no-result:hover { background: none; }
+  .loc-opt.manual-opt { color: #fbbf24; border-top: 1px solid var(--border); }
+  .loc-opt.manual-opt:hover { background: rgba(245,158,11,.1); }
+
+  .loc-fallback {
+    margin-top: 8px; display: flex; flex-direction: column; gap: 5px;
+  }
+  .loc-notfound-txt { font-size: 11.5px; color: #fbbf24; font-weight: 500; }
+
+  /* Ticket result */
+
+  .ticket-result {
+    background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(34,211,238,.05));
+    border: 1px solid rgba(16,185,129,.3);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: none;
+    animation: fadeSlide .4s ease;
+    text-align: center;
+  }
+  .ticket-result.show { display: block; }
+  .result-icon { font-size: 36px; margin-bottom: 10px; }
+  .result-num { font-size: 28px; font-weight: 800; color: var(--success); margin: 6px 0; }
+  .result-msg { font-size: 13px; color: var(--muted); }
+  .result-link {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 9px 20px;
+    background: rgba(16,185,129,.15);
+    border: 1px solid rgba(16,185,129,.3);
+    border-radius: 25px;
+    color: var(--success);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background .2s;
+  }
+  .result-link:hover { background: rgba(16,185,129,.25); }
+
+  /* Offline banner */
+  .offline-banner {
+    display: none;
+    background: rgba(245,158,11,.12);
+    border: 1px solid rgba(245,158,11,.35);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #fcd34d;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .offline-banner.show { display: flex; }
+  .offline-banner .off-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .offline-banner .off-body { line-height: 1.6; }
+  .offline-banner strong { font-size: 13px; display: block; margin-bottom: 2px; }
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(245,158,11,.2);
+    border: 1px solid rgba(245,158,11,.4);
+    color: #fcd34d;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .copy-btn:hover { background: rgba(245,158,11,.3); }
+  .copy-btn.copied { background: rgba(16,185,129,.15); border-color: rgba(16,185,129,.3); color: #6ee7b7; }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 9999;
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all .3s ease;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); color: #fca5a5; }
+  .toast.success { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); color: #6ee7b7; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  .populated { border-color: rgba(99,102,241,.4) !important; }
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+
+  <header>
+    <div class="logo-icon">🎫</div>
+    <div>
+      <h1>Abertura Rápida de Chamado</h1>
+      <p>Empresa Exemplo · GLPI Helpdesk</p>
+    </div>
+    <div class="header-badge" id="connStatus">⚡ Conectando...</div>
+  </header>
+
+  <main>
+    <!-- LEFT: Chat -->
+    <div class="chat-panel">
+      <div>
+        <div class="chat-header">Olá, Guilherme! <br><span>Me diga o que precisa.</span></div>
+        <div class="chat-sub">Descreva com suas palavras e eu preencho o chamado automaticamente.</div>
+      </div>
+
+      <div class="chat-history" id="chatHistory">
+        <div class="msg">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-bubble">
+            Olá! Sou seu assistente de chamados. Me diga o que está acontecendo com suas palavras — pode ser curto ou detalhado — e eu cuido do resto: título, descrição, categoria, urgência, impacto e severidade. Também peço a localização para incluir no chamado. Pode falar!
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-tips" id="quickTips">
+        <div class="tip" onclick="useTip(this)">💻 Meu computador não liga</div>
+        <div class="tip" onclick="useTip(this)">🌐 Sem acesso à internet</div>
+        <div class="tip" onclick="useTip(this)">🖨️ Impressora não imprime</div>
+        <div class="tip" onclick="useTip(this)">🔑 Esqueci minha senha</div>
+        <div class="tip" onclick="useTip(this)">📂 Não consigo acessar pasta de rede</div>
+        <div class="tip" onclick="useTip(this)">📧 E-mail não funciona</div>
+      </div>
+
+      <div class="chat-input-wrap">
+        <textarea id="userInput" placeholder="Ex: meu computador não está ligando desde ontem de manhã..." rows="1" 
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" onclick="sendMessage()" id="sendBtn" title="Enviar (Enter)">
+          <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Ticket Form -->
+    <div class="ticket-panel">
+
+      <!-- Requerente / Observador -->
+      <div class="panel-card">
+        <div class="card-head">
+          <div class="icon purple">👤</div>
+          Requerente &amp; Observador
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="requester-row">
+            <div class="req-avatar">Admin</div>
+            <div class="req-info">
+              <div class="req-name">Administrador</div>
+              <div class="req-role">usuario.admin · ID 207</div>
+            </div>
+            <div class="req-badge">Requerente</div>
+          </div>
+          <div class="requester-row">
+            <div class="req-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">N2</div>
+            <div class="req-info">
+              <div class="req-name">Nível 2 – Atendimento Técnico</div>
+              <div class="req-role">Grupo observador até atribuição · ID 108</div>
+            </div>
+            <div class="req-badge" style="color:#fbbf24;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.1)">Observador</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chamado gerado -->
+      <div class="panel-card" id="ticketCard">
+        <div class="card-head">
+          <div class="icon cyan">📋</div>
+          Dados do Chamado
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Título</label>
+            <input type="text" id="fTitle" placeholder="Aguardando descrição..." />
+          </div>
+          <div class="field">
+            <label>Descrição</label>
+            <textarea id="fDesc" placeholder="Descreva o problema acima e preencherei aqui..."></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" class="field">
+            <div class="field" style="margin:0">
+              <label>Tipo</label>
+              <select id="fType">
+                <option value="2">Requisição</option>
+                <option value="1">Incidente</option>
+              </select>
+            </div>
+            <div class="field" style="margin:0">
+              <label>Localização</label>
+              <!-- Searchable combobox -->
+              <div class="loc-wrap" id="locWrap">
+                <div class="loc-input-row">
+                  <input type="text" id="locSearch" placeholder="Buscar setor..." autocomplete="off"
+                    oninput="filterLocs(this.value)" onfocus="openLocMenu()" onblur="scheduleClose()"
+                    onkeydown="locKeyNav(event)" />
+                  <button class="loc-clear" id="locClear" onclick="clearLoc()" title="Limpar" style="display:none">&times;</button>
+                </div>
+                <div class="loc-dropdown" id="locDropdown"></div>
+                <!-- Hidden id armazenado aqui -->
+                <input type="hidden" id="fLocation" />
+                <!-- Fallback: setor não listado -->
+                <div class="loc-fallback" id="locFallback" style="display:none">
+                  <span class="loc-notfound-txt">⚠️ Setor não encontrado na lista</span>
+                  <label style="margin-top:6px;">Digite o nome do setor manualmente:</label>
+                  <input type="text" id="locManual" placeholder="Ex: DIVPA, COOMU, ..." />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Categoria</label>
+            <select id="fCategory">
+              <option value="">Selecionar...</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITIL -->
+      <div class="panel-card">
+        <div class="card-head">
+          <div class="icon amber">⚡</div>
+          Urgência · Impacto · Prioridade
+        </div>
+        <div class="card-body">
+          <div class="itil-grid">
+            <div class="itil-item">
+              <label>Urgência</label>
+              <div class="badge-group" id="urgGroup">
+                <div class="badge-opt" data-val="5" onclick="selectBadge('urgGroup',this)"><span class="badge-dot" style="background:#10b981"></span>Muito Baixa</div>
+                <div class="badge-opt" data-val="4" onclick="selectBadge('urgGroup',this)"><span class="badge-dot" style="background:#22d3ee"></span>Baixa</div>
+                <div class="badge-opt selected" data-val="3" onclick="selectBadge('urgGroup',this)"><span class="badge-dot" style="background:#f59e0b"></span>Média</div>
+                <div class="badge-opt" data-val="2" onclick="selectBadge('urgGroup',this)"><span class="badge-dot" style="background:#f97316"></span>Alta</div>
+                <div class="badge-opt" data-val="1" onclick="selectBadge('urgGroup',this)"><span class="badge-dot" style="background:#ef4444"></span>Muito Alta</div>
+              </div>
+            </div>
+            <div class="itil-item">
+              <label>Impacto</label>
+              <div class="badge-group" id="impGroup">
+                <div class="badge-opt" data-val="5" onclick="selectBadge('impGroup',this)"><span class="badge-dot" style="background:#10b981"></span>Muito Baixo</div>
+                <div class="badge-opt" data-val="4" onclick="selectBadge('impGroup',this)"><span class="badge-dot" style="background:#22d3ee"></span>Baixo</div>
+                <div class="badge-opt selected" data-val="3" onclick="selectBadge('impGroup',this)"><span class="badge-dot" style="background:#f59e0b"></span>Médio</div>
+                <div class="badge-opt" data-val="2" onclick="selectBadge('impGroup',this)"><span class="badge-dot" style="background:#f97316"></span>Alto</div>
+                <div class="badge-opt" data-val="1" onclick="selectBadge('impGroup',this)"><span class="badge-dot" style="background:#ef4444"></span>Muito Alto</div>
+              </div>
+            </div>
+            <div class="itil-item">
+              <label>Prioridade</label>
+              <div class="badge-group" id="priGroup">
+                <div class="badge-opt" data-val="5" onclick="selectBadge('priGroup',this)"><span class="badge-dot" style="background:#10b981"></span>Muito Baixa</div>
+                <div class="badge-opt" data-val="4" onclick="selectBadge('priGroup',this)"><span class="badge-dot" style="background:#22d3ee"></span>Baixa</div>
+                <div class="badge-opt selected" data-val="3" onclick="selectBadge('priGroup',this)"><span class="badge-dot" style="background:#f59e0b"></span>Média</div>
+                <div class="badge-opt" data-val="2" onclick="selectBadge('priGroup',this)"><span class="badge-dot" style="background:#f97316"></span>Alta</div>
+                <div class="badge-opt" data-val="1" onclick="selectBadge('priGroup',this)"><span class="badge-dot" style="background:#ef4444"></span>Muito Alta</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Offline banner -->
+      <div class="offline-banner" id="offlineBanner">
+        <div class="off-icon">⚠️</div>
+        <div class="off-body">
+          <strong>Sem acesso ao GLPI — modo offline</strong>
+          Não foi possível conectar ao servidor GLPI (<code>10.9.64.8</code>). Verifique se você está conectado à rede da Empresa Exemplo. Os dados do chamado foram preservados abaixo — copie e abra manualmente.
+          <button class="copy-btn" id="copyBtn" onclick="copyTicket()">📋 Copiar dados do chamado</button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button class="submit-btn" onclick="submitTicket()" id="submitBtn">
+        <span>🚀</span> Abrir Chamado no GLPI
+      </button>
+
+      <!-- Result -->
+      <div class="ticket-result" id="ticketResult">
+        <div class="result-icon">✅</div>
+        <div id="resultNum" class="result-num">#----</div>
+        <div class="result-msg">Chamado aberto com sucesso! Você foi definido como requerente e o grupo N2 como observador.</div>
+        <a href="#" id="resultLink" class="result-link" target="_blank">🔗 Abrir no GLPI</a>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const CONFIG = {
+  glpiBase: 'https://glpi.suaempresa.com.br',
+  apiBase:  'https://glpi.suaempresa.com.br/apirest.php',
+  appToken: 'SEU_APP_TOKEN_AQUI',
+  userToken:'SEU_USER_TOKEN_AQUI',
+  userId:   207,     // usuario.admin
+  n2GroupId: 108,    // Nivel 2 - Atendimento Tecnico n2
+};
+
+// Locations extracted from API response
+const LOCATIONS = [
+  // Unidades externas (nível 1)
+  {id:82,  name:'CASARIO',            completename:'CASARIO'},
+  {id:9,   name:'CCLA',               completename:'CCLA'},
+  {id:17,  name:'CEC',                completename:'CEC'},
+  {id:20,  name:'CMS',                completename:'CMS'},
+  {id:12,  name:'COV',                completename:'COV'},
+  {id:14,  name:'EMVL',               completename:'EMVL'},
+  {id:16,  name:'IMP',                completename:'IMP'},
+  {id:11,  name:'MAP',                completename:'MAP'},
+  {id:15,  name:'MCM',                completename:'MCM'},
+  {id:13,  name:'MHAERJ',             completename:'MHAERJ'},
+  {id:21,  name:'SCM',                completename:'SCM'},
+  {id:7,   name:'TAA',                completename:'TAA'},
+  {id:8,   name:'TAG',                completename:'TAG'},
+  {id:6,   name:'TGG',                completename:'TGG'},
+  {id:10,  name:'TJC',                completename:'TJC'},
+  {id:18,  name:'TML',                completename:'TML'},
+  // SEDE (nível 1)
+  {id:1,   name:'SEDE',               completename:'SEDE'},
+  // SEDE > setores (nível 2)
+  {id:60,  name:'ASSCAN',             completename:'SEDE > ASSCAN'},
+  {id:83,  name:'ASSCC',              completename:'SEDE > ASSCC'},
+  {id:41,  name:'ASSCI',              completename:'SEDE > ASSCI'},
+  {id:32,  name:'ASSCOM',             completename:'SEDE > ASSCOM'},
+  {id:86,  name:'ASSIMP',             completename:'SEDE > ASSIMP'},
+  {id:56,  name:'ASSJUR',             completename:'SEDE > ASSJUR'},
+  {id:71,  name:'ASSPE',              completename:'SEDE > ASSPE'},
+  {id:87,  name:'ASSPO',              completename:'SEDE > ASSPO'},
+  {id:85,  name:'ASSPRESI',           completename:'SEDE > ASSPRESI'},
+  {id:65,  name:'ASSTI',              completename:'SEDE > ASSTI'},
+  {id:88,  name:'ATI',                completename:'SEDE > ATI'},
+  {id:49,  name:'COOACM',             completename:'SEDE > COOACM'},
+  {id:72,  name:'COOMU',              completename:'SEDE > COOMU'},
+  {id:50,  name:'COOPE',              completename:'SEDE > COOPE'},
+  {id:76,  name:'DIPA',               completename:'SEDE > DIPA'},
+  {id:61,  name:'DIRAF',              completename:'SEDE > DIRAF'},
+  {id:48,  name:'DIRETORIA',          completename:'SEDE > DIRETORIA'},
+  {id:53,  name:'DIVA',               completename:'SEDE > DIVA'},
+  {id:58,  name:'DIVCOL',             completename:'SEDE > DIVCOL'},
+  {id:64,  name:'DIVMP',              completename:'SEDE > DIVMP'},
+  {id:57,  name:'DIVOF',              completename:'SEDE > DIVOF'},
+  {id:59,  name:'DIVP',               completename:'SEDE > DIVP'},
+  {id:66,  name:'DIVPA',              completename:'SEDE > DIVPA'},
+  {id:78,  name:'Empresa Exemplo',             completename:'SEDE > Empresa Exemplo'},
+  {id:51,  name:'GERPC',              completename:'SEDE > GERPC'},
+  {id:52,  name:'GERPI',              completename:'SEDE > GERPI'},
+  {id:80,  name:'PRES',               completename:'SEDE > PRES'},
+  {id:67,  name:'PRESI',              completename:'SEDE > PRESI'},
+  {id:47,  name:'PRESIDENTE',         completename:'SEDE > PRESIDENTE'},
+  {id:81,  name:'SECCC',              completename:'SEDE > SECCC'},
+  {id:84,  name:'TAG',                completename:'SEDE > TAG'},
+];
+
+// Categories from GLPI (ITIL/COBIT aligned – fetched 04/04/2026)
+const CATEGORIES = [
+  {id:55, name:'Equipamentos de Informática'},
+  {id:56, name:'Computador/Notebook'},
+  {id:57, name:'Solicitação e Movimentação'},
+  {id:58, name:'Acessórios e Periféricos'},
+  {id:59, name:'Impressões'},
+  {id:60, name:'Suprimentos (Toner, Cilindro)'},
+  {id:61, name:'Falha de Impressão'},
+  {id:62, name:'Softwares de Estação'},
+  {id:63, name:'Pacote Office ou LibreOffice'},
+  {id:64, name:'Certificado Digital'},
+  {id:65, name:'Sistemas Corporativos'},
+  {id:66, name:'Sistema Eletrônico (SEI)'},
+  {id:67, name:'Portal GLPI'},
+  {id:68, name:'E-mail Corporativo'},
+  {id:69, name:'Gestão de Contas e Acesso'},
+  {id:70, name:'Criação de Conta ou Acesso na Rede'},
+  {id:71, name:'Ajuste de Permissões'},
+  {id:72, name:'Reset de Senha ou Bloqueio'},
+  {id:73, name:'Falha de Confiança (AD)'},
+  {id:74, name:'Remoção de Acesso'},
+  {id:75, name:'Infraestrutura e Redes'},
+  {id:76, name:'Internet e Wi-Fi'},
+  {id:77, name:'Cabeamentos ou Switches'},
+  {id:78, name:'Telefonia Fixa e Ramais'},
+  {id:79, name:'Gestão de Servidores'},
+  {id:80, name:'Virtualização (VMs e Hyper-V)'},
+  {id:81, name:'Active Directory e Servidores'},
+  {id:82, name:'Rotinas de Backup'},
+  {id:83, name:'Serviços Terceirizados'},
+  {id:84, name:'Dúvidas e Apoio Técnico'},
+  {id:85, name:'Compras e Aquisições'},
+  {id:86, name:'Empréstimos de Equipamentos'},
+  {id:87, name:'CFTV e Segurança Física'},
+];
+
+// ============================================================
+// GLPI SESSION
+// ============================================================
+let sessionToken = null;
+
+async function glpiReq(method, path, body) {
+  const headers = { 'Content-Type': 'application/json', 'App-Token': CONFIG.appToken };
+  if (sessionToken) headers['Session-Token'] = sessionToken;
+  const res = await fetch(CONFIG.apiBase + path, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    // bypass self-signed cert handled at OS level; for fetch in browser we ignore
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`HTTP ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+async function initSession() {
+  try {
+    const data = await glpiReq('GET', '/initSession', null, { Authorization: `user_token ${CONFIG.userToken}` });
+    sessionToken = data.session_token;
+    document.getElementById('connStatus').textContent = '🟢 Conectado ao GLPI';
+    return true;
+  } catch (e) {
+    document.getElementById('connStatus').textContent = '🔴 Offline';
+    return false;
+  }
+}
+
+async function createTicket(payload) {
+  // Need fresh session for create
+  const headers = {
+    'Content-Type': 'application/json',
+    'App-Token': CONFIG.appToken,
+    'Authorization': `user_token ${CONFIG.userToken}`,
+  };
+  // init fresh
+  const s = await fetch(CONFIG.apiBase + '/initSession', { headers, method: 'GET' });
+  if (!s.ok) throw new Error('Falha ao iniciar sessão');
+  const sData = await s.json();
+  const stok = sData.session_token;
+
+  const tRes = await fetch(CONFIG.apiBase + '/Ticket', {
+    method: 'POST',
+    headers: { ...headers, 'Session-Token': stok },
+    body: JSON.stringify({ input: payload }),
+  });
+  if (!tRes.ok) {
+    const e = await tRes.text();
+    throw new Error(`Erro ${tRes.status}: ${e}`);
+  }
+  const tData = await tRes.json();
+  const ticketId = tData.id;
+
+  // Add N2 group as watcher (type 3 = watcher, itemtype_link = Group)
+  await fetch(CONFIG.apiBase + '/Ticket_User', {
+    method: 'POST',
+    headers: { ...headers, 'Session-Token': stok },
+    body: JSON.stringify({ input: {
+      tickets_id: ticketId,
+      users_id:   0,
+      type:       3, // watcher
+      use_notification: 1,
+      alternative_email: '',
+    }}),
+  }).catch(() => {});
+
+  // Add N2 group as watcher group
+  await fetch(CONFIG.apiBase + '/Group_Ticket', {
+    method: 'POST',
+    headers: { ...headers, 'Session-Token': stok },
+    body: JSON.stringify({ input: {
+      tickets_id: ticketId,
+      groups_id:  CONFIG.n2GroupId,
+      type:       3, // watcher
+    }}),
+  }).catch(() => {});
+
+  // Kill session
+  await fetch(CONFIG.apiBase + '/killSession', { headers: { ...headers, 'Session-Token': stok } }).catch(() => {});
+
+  return ticketId;
+}
+
+// ============================================================
+// AI: rule-based classification
+// ============================================================
+// Classification patterns → mapped to real GLPI ITIL/COBIT categories
+const PATTERNS = [
+
+  // Computador / Notebook (hardware)
+  { rx: /computador|notebook|pc|laptop|não (liga|inicia|funciona)|tela (preta|azul)|formato|hd|ssd|memória ram|hardware/i,
+    title: (t) => `Falha em computador/notebook – ${cap(t)}`,
+    type: 1, cat: 56, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Usuário relata falha em computador ou notebook. Situação: "${t}".
+
+Itens a verificar: hardware (fonte, memória, HD/SSD), POST, loAdmin de eventos, teste de memória.` },
+
+  // Acessórios e periféricos
+  { rx: /mouse|teclado|headset|fone|webcam|monitor|tela|periféric|usb|hub/i,
+    title: (t) => `Problema em acessório/periférico – ${cap(t)}`,
+    type: 1, cat: 58, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Usuário relata falha em acessório ou periférico. Situação: "${t}".
+
+Verificar conexão física, driver do dispositivo e testar em outra porta USB.` },
+
+  // Toner / suprimentos
+  { rx: /toner|cartucho|cilindro|suprimento|tinta/i,
+    title: (t) => `Solicitação de suprimento – ${cap(t)}`,
+    type: 2, cat: 60, urg: 4, imp: 4, pri: 4,
+    desc: (t) => `Solicitação de suprimento de impressão. Situação: "${t}".
+
+Verificar estoque de toner/cilindro e providenciar reposição conforme demanda.` },
+
+  // Falha de impressão
+  { rx: /impressora (não|nao)|erro.*imprimir|falha.*impressão|fila.*impressão|documento.*preso/i,
+    title: (t) => `Falha de impressão – ${cap(t)}`,
+    type: 1, cat: 61, urg: 2, imp: 3, pri: 2,
+    desc: (t) => `Usuário relata falha no processo de impressão. Situação: "${t}".
+
+Verificar: fila de impressão no servidor, driver, conectividade da impressora e status do spooler.` },
+
+  // Impressão / solicitação
+  { rx: /imprimir|impressão|impressora/i,
+    title: (t) => `Solicitação de impressão – ${cap(t)}`,
+    type: 2, cat: 59, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Usuário relata demanda relacionada a impressão. Situação: "${t}".
+
+Verificar impressora padrão, fila e configurações de impressão.` },
+
+  // Office / LibreOffice
+  { rx: /word|excel|powerpoint|office|libreoffice|calc|writer|planilha|documento/i,
+    title: (t) => `Problema no Pacote Office/LibreOffice – ${cap(t)}`,
+    type: 1, cat: 63, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Usuário relata falha ou dúvida no uso do pacote Office ou LibreOffice. Situação: "${t}".
+
+Verificar: licença de ativação, versão instalada, integridade da instalação.` },
+
+  // SEI
+  { rx: /sei|sistema eletr|processo.*digital|assinatura.*digital.*sei/i,
+    title: (t) => `Problema no SEI – ${cap(t)}`,
+    type: 1, cat: 66, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Usuário relata falha ou solicitação no Sistema Eletrônico de Informações (SEI). Situação: "${t}".
+
+Verificar acesso, perfil do usuário e disponibilidade do sistema.` },
+
+  // GLPI
+  { rx: /glpi|chamado|helpdesk|service desk|portal ti/i,
+    title: (t) => `Suporte ao Portal GLPI – ${cap(t)}`,
+    type: 2, cat: 67, urg: 4, imp: 4, pri: 4,
+    desc: (t) => `Solicitação ou incidente relacionado ao portal GLPI. Situação: "${t}".
+
+Verificar acesso ao portal, perfil de usuário e permissões.` },
+
+  // Certificado digital
+  { rx: /certificado digital|token|e-cpf|e-cnpj|assinatura digital|icp.brasil/i,
+    title: (t) => `Certificado Digital – ${cap(t)}`,
+    type: 2, cat: 64, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Solicitação ou incidente relacionado a certificado digital. Situação: "${t}".
+
+Verificar validade do certificado, driver do token e configurações do navegador.` },
+
+  // E-mail
+  { rx: /e-mail|email|outlook|correio|mensagem|caixa.*entrada|spam|thunderbird/i,
+    title: (t) => `Problema no e-mail corporativo – ${cap(t)}`,
+    type: 1, cat: 68, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Usuário relata falha no e-mail corporativo. Situação: "${t}".
+
+Verificar: configurações da conta, servidor SMTP/IMAP, conectividade e cota de caixa postal.` },
+
+  // Reset de senha / bloqueio
+  { rx: /senha|password|bloqueado|desbloqueio|expirou|não consigo.*entrar|conta bloqueada/i,
+    title: (t) => `Reset de senha ou desbloqueio de conta`,
+    type: 2, cat: 72, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Usuário relata necessidade de reset ou desbloqueio de conta. Situação: "${t}".
+
+Verificar conta no Active Directory, status (bloqueada/expirada) e redefinir conforme política de segurança.` },
+
+  // Criação de conta / novo acesso
+  { rx: /criar.*conta|nova.*conta|novo.*usuário|novo.*acesso|acesso.*sistema|liberar.*acesso|cadastrar.*usuário/i,
+    title: (t) => `Criação de conta ou acesso na rede`,
+    type: 2, cat: 70, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Solicitação de criação de conta ou concessão de acesso. Situação: "${t}".
+
+Verificar aprovação da chefia imediata, criar conta no AD e atribuir grupos/permissões conforme setor.` },
+
+  // Ajuste de permissões
+  { rx: /permissão|acesso.*pasta|pasta.*acesso|sem.*permissão|sem.*acesso.*a/i,
+    title: (t) => `Ajuste de permissões – ${cap(t)}`,
+    type: 2, cat: 71, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Solicitação de ajuste de permissão em recurso. Situação: "${t}".
+
+Verificar grupo do AD, permissões NTFS na pasta e política GPO vigente.` },
+
+  // Remoção de acesso
+  { rx: /remover.*acesso|revogar|retirar.*permissão|desativar.*conta|encerramento.*contrato/i,
+    title: (t) => `Remoção de acesso – ${cap(t)}`,
+    type: 2, cat: 74, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Solicitação de remoção ou revogação de acesso. Situação: "${t}".
+
+Desativar conta no AD, remover dos grupos e revogar acessos a sistemas.` },
+
+  // Active Directory / Falha de confiança
+  { rx: /active directory|AD|domínio|trust|confiança|gpo|politica.*grupo|logon.*falhou|não entra no domínio/i,
+    title: (t) => `Problema no Active Directory ou Domínio – ${cap(t)}`,
+    type: 1, cat: 73, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Incidente relacionado ao Active Directory ou política de domínio. Situação: "${t}".
+
+Verificar relação de confiança (Test-ComputerSecureChannel), replição entre DCs e GPOs aplicadas.` },
+
+  // Internet / Wi-Fi
+  { rx: /internet|site|navegar|browser|wi-fi|wifi|sem.*rede|conectividade|acesso à web/i,
+    title: (t) => `Problema de internet ou Wi-Fi – ${cap(t)}`,
+    type: 1, cat: 76, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Usuário sem acesso à internet ou Wi-Fi. Situação: "${t}".
+
+Verificar: conexão física/sem fio, DNS, gateway padrão, proxy e firewall.` },
+
+  // Infraestrutura / Rede / Cabeamento
+  { rx: /cabeamento|switch|cabo de rede|patch panel|rack|ponto de rede|sem.*rede.*cabeada/i,
+    title: (t) => `Problema de cabeamento ou switch – ${cap(t)}`,
+    type: 1, cat: 77, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Falha em infraestrutura de rede física. Situação: "${t}".
+
+Verificar cabeamento, patch panel, switch e leds de link no equipamento.` },
+
+  // Telefonia
+  { rx: /telefone|ramal|telefonia|voip|ligação|discagem|pabx/i,
+    title: (t) => `Problema de telefonia ou ramal – ${cap(t)}`,
+    type: 1, cat: 78, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Falha em telefone fixo ou ramal. Situação: "${t}".
+
+Verificar ramal na central PABX/VoIP, cabeamento e configuração do aparelho.` },
+
+  // Servidor / Backup
+  { rx: /backup|rotina.*backup|falha.*backup|arquivo.*backup/i,
+    title: (t) => `Problema em rotina de backup – ${cap(t)}`,
+    type: 1, cat: 82, urg: 2, imp: 1, pri: 1,
+    desc: (t) => `Falha ou solicitação relacionada a backup. Situação: "${t}".
+
+Verificar job de backup, loAdmin de erro, espaço disponível e integridade dos arquivos.` },
+
+  // Virtualização
+  { rx: /vm|virtual|hyper-v|hyperv|máquina virtual|snapshot|clone/i,
+    title: (t) => `Problema de virtualização – ${cap(t)}`,
+    type: 1, cat: 80, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Incidente envolvendo infraestrutura de virtualização. Situação: "${t}".
+
+Verificar status da VM no Hyper-V, recursos alocados e loAdmin do host.` },
+
+  // Servidor
+  { rx: /servidor|server|serviço.*parado|IIS|SQL|windows server/i,
+    title: (t) => `Problema em servidor – ${cap(t)}`,
+    type: 1, cat: 79, urg: 2, imp: 1, pri: 1,
+    desc: (t) => `Falha em servidor ou serviço. Situação: "${t}".
+
+Verificar: status do serviço, loAdmin do sistema, espaço em disco e recursos do servidor.` },
+
+  // Sistemas corporativos (genérico)
+  { rx: /sistema|aplicativo|app|programa|software|erro ao abrir|não abre|trava|lento/i,
+    title: (t) => `Falha em sistema ou software – ${cap(t)}`,
+    type: 1, cat: 62, urg: 3, imp: 3, pri: 3,
+    desc: (t) => `Usuário relata problema em sistema ou software. Situação: "${t}".
+
+Verificar versão instalada, loAdmin de erro, compatibilidade e reinstalação se necessário.` },
+
+  // Solicitação / movimentação de equipamento
+  { rx: /movimentar|movimentação|transferir.*equipamento|trocar.*equipamento|empréstimo|emprestar/i,
+    title: (t) => `Solicitação ou movimentação de equipamento`,
+    type: 2, cat: 57, urg: 4, imp: 4, pri: 4,
+    desc: (t) => `Solicitação de movimentação ou empréstimo de equipamento. Situação: "${t}".
+
+Verificar patrimônio do equipamento e registrar movimentação conforme política interna.` },
+
+  // Compras / aquisições
+  { rx: /comprar|compra|aquisição|cotar|orçamento.*ti|novo.*equipamento/i,
+    title: (t) => `Solicitação de compra/aquisição de TI`,
+    type: 2, cat: 85, urg: 5, imp: 5, pri: 5,
+    desc: (t) => `Solicitação de aquisição de equipamento ou serviço de TI. Situação: "${t}".
+
+Levantar especificações técnicas, verificar processo licitatório e encaminhar para DISS/DIRAF.` },
+
+  // CFTV
+  { rx: /câmera|cftv|câmera.*segurança|vigilância|gravação/i,
+    title: (t) => `Problema em CFTV ou câmera de segurança – ${cap(t)}`,
+    type: 1, cat: 87, urg: 2, imp: 2, pri: 2,
+    desc: (t) => `Falha em sistema de CFTV ou câmera de segurança. Situação: "${t}".
+
+Verificar câmera, NVR/DVR, cabeamento e armazenamento de gravações.` },
+
+  // Dúvida / apoio técnico
+  { rx: /dúvida|como faço|como usar|orientação|ajuda com|apoio/i,
+    title: (t) => `Dúvida ou apoio técnico – ${cap(t)}`,
+    type: 2, cat: 84, urg: 4, imp: 4, pri: 4,
+    desc: (t) => `Usuário solicita orientação técnica. Situação: "${t}".
+
+Prestar apoio técnico e registrar solução na base de conhecimento.` },
+];
+
+// Helper: capitalize first letter and truncate for use in titles
+function cap(t) {
+  const s = t.length > 50 ? t.slice(0, 47) + '...' : t;
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function classify(text) {
+  for (const p of PATTERNS) {
+    if (p.rx.test(text)) {
+      return {
+        title: p.title(text),
+        desc:  p.desc(text),
+        type:  p.type,
+        cat:   p.cat,
+        urg:   p.urg,
+        imp:   p.imp,
+        pri:   p.pri,
+      };
+    }
+  }
+  // Generic fallback → Dúvidas e Apoio Técnico (id 84)
+  return {
+    title: cap(text),
+    desc:  `Usuário relata a seguinte situação:\n\n"${text}"\n\nNecessário análise e verificação técnica para diagnóstico e resolução.`,
+    type:  2,
+    cat:   84,
+    urg:   3,
+    imp:   3,
+    pri:   3,
+  };
+}
+
+function extractLocation(text) {
+  const t = text.toLowerCase();
+  // Sort by length descending to match more specific names first (e.g., "ASSTI" before "SEDE")
+  const sorted = [...LOCATIONS].sort((a,b) => b.name.length - a.name.length);
+  for (const loc of sorted) {
+    if (t.includes(loc.name.toLowerCase()) || (loc.completename && t.includes(loc.completename.toLowerCase()))) {
+      return loc.id;
+    }
+  }
+  return '';
+}
+
+// ============================================================
+// UI helpers
+// ============================================================
+function selectBadge(groupId, el) {
+  document.querySelectorAll(`#${groupId} .badge-opt`).forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getBadgeVal(groupId) {
+  const sel = document.querySelector(`#${groupId} .badge-opt.selected`);
+  return sel ? parseInt(sel.dataset.val) : 3;
+}
+
+function setBadge(groupId, val) {
+  document.querySelectorAll(`#${groupId} .badge-opt`).forEach(b => {
+    b.classList.toggle('selected', parseInt(b.dataset.val) === val);
+  });
+}
+
+function useTip(el) {
+  document.getElementById('userInput').value = el.textContent.replace(/^[^\w]+/, '').trim();
+  autoResize(document.getElementById('userInput'));
+}
+
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function addMsg(role, html) {
+  const hist = document.getElementById('chatHistory');
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'user' ? 'user' : ''}`;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'user' ? 'Admin' : '🤖'}</div>
+    <div class="msg-bubble">${html}</div>
+  `;
+  hist.appendChild(div);
+  hist.scrollTop = hist.scrollHeight;
+  return div;
+}
+
+function showThinking() {
+  const div = addMsg('bot', '<span class="thinking-dots"><span>●</span><span>●</span><span>●</span></span> Analisando...');
+  div.querySelector('.msg-bubble').classList.add('thinking');
+  return div;
+}
+
+function showToast(msg, type='error') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// ============================================================
+// ============================================================
+// Location Combobox
+// ============================================================
+let locCloseTimer = null;
+let locActiveIdx  = -1;
+let locFiltered   = [];
+
+function buildLocItem(loc, query) {
+  const div = document.createElement('div');
+  div.className = 'loc-opt';
+  div.dataset.id = loc.id;
+
+  const badge = `<span class="loc-badge">${loc.id}</span>`;
+  const isNested = loc.completename.includes('>');
+  const namePart = isNested
+    ? `<span class="loc-full">${loc.completename.split('>')[0].trim()} › </span><span class="loc-name">${loc.name}</span>`
+    : `<span class="loc-name">${loc.name}</span>`;
+
+  div.innerHTML = badge + namePart;
+  div.addEventListener('mousedown', (e) => { e.preventDefault(); selectLoc(loc); });
+  return div;
+}
+
+function renderLocDropdown(query) {
+  const dd = document.getElementById('locDropdown');
+  dd.innerHTML = '';
+  locActiveIdx = -1;
+
+  const q = query.trim().toLowerCase();
+  locFiltered = q
+    ? LOCATIONS.filter(l =>
+        l.name.toLowerCase().includes(q) ||
+        l.completename.toLowerCase().includes(q)
+      )
+    : [...LOCATIONS];
+
+  if (locFiltered.length === 0) {
+    const none = document.createElement('div');
+    none.className = 'loc-opt no-result';
+    none.textContent = 'Nenhum setor encontrado';
+    dd.appendChild(none);
+  } else {
+    locFiltered.forEach(l => dd.appendChild(buildLocItem(l, q)));
+  }
+
+  // "Digitar manualmente" option always at the bottom
+  const manual = document.createElement('div');
+  manual.className = 'loc-opt manual-opt';
+  manual.innerHTML = '✏️ &nbsp;Não encontrei meu setor — digitar manualmente';
+  manual.addEventListener('mousedown', (e) => { e.preventDefault(); showManualLoc(); });
+  dd.appendChild(manual);
+}
+
+function openLocMenu() {
+  clearTimeout(locCloseTimer);
+  renderLocDropdown(document.getElementById('locSearch').value);
+  document.getElementById('locDropdown').classList.add('open');
+}
+
+function filterLocs(v) {
+  clearTimeout(locCloseTimer);
+  renderLocDropdown(v);
+  document.getElementById('locDropdown').classList.add('open');
+  document.getElementById('fLocation').value = '';
+  document.getElementById('locClear').style.display = v ? 'block' : 'none';
+  document.getElementById('locFallback').style.display = 'none';
+}
+
+function scheduleClose() {
+  locCloseTimer = setTimeout(() => {
+    document.getElementById('locDropdown').classList.remove('open');
+  }, 200);
+}
+
+function selectLoc(loc) {
+  document.getElementById('locSearch').value = loc.completename;
+  document.getElementById('fLocation').value = loc.id;
+  document.getElementById('locClear').style.display = 'block';
+  document.getElementById('locDropdown').classList.remove('open');
+  document.getElementById('locFallback').style.display = 'none';
+  document.getElementById('locManual').value = '';
+}
+
+function clearLoc() {
+  document.getElementById('locSearch').value = '';
+  document.getElementById('fLocation').value = '';
+  document.getElementById('locClear').style.display = 'none';
+  document.getElementById('locFallback').style.display = 'none';
+  document.getElementById('locManual').value = '';
+  document.getElementById('locSearch').focus();
+}
+
+function showManualLoc() {
+  document.getElementById('locFallback').style.display = 'flex';
+  document.getElementById('locDropdown').classList.remove('open');
+  document.getElementById('fLocation').value = '';
+  document.getElementById('locSearch').value = '';
+  document.getElementById('locClear').style.display = 'none';
+  document.getElementById('locManual').focus();
+}
+
+function setLocById(id) {
+  const loc = LOCATIONS.find(l => l.id === id);
+  if (loc) selectLoc(loc);
+}
+
+function locKeyNav(e) {
+  const dd = document.getElementById('locDropdown');
+  const opts = dd.querySelectorAll('.loc-opt:not(.no-result)');
+  if (!dd.classList.contains('open')) return;
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    locActiveIdx = Math.min(locActiveIdx + 1, opts.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    locActiveIdx = Math.max(locActiveIdx - 1, 0);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (locActiveIdx >= 0 && opts[locActiveIdx]) opts[locActiveIdx].dispatchEvent(new MouseEvent('mousedown'));
+    return;
+  } else if (e.key === 'Escape') {
+    dd.classList.remove('open'); return;
+  } else { return; }
+
+  opts.forEach((o, i) => o.classList.toggle('active', i === locActiveIdx));
+  if (opts[locActiveIdx]) opts[locActiveIdx].scrollIntoView({ block: 'nearest' });
+}
+
+// ============================================================
+// Populate dropdowns
+// ============================================================
+function populateDropdowns() {
+  // Categories only — location uses combobox (no <select> to fill)
+  const cSel = document.getElementById('fCategory');
+  CATEGORIES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.name;
+    cSel.appendChild(o);
+  });
+}
+
+
+// ============================================================
+// Main: send message
+// ============================================================
+let lastText = '';
+
+async function sendMessage() {
+  const inp = document.getElementById('userInput');
+  const text = inp.value.trim();
+  if (!text) return;
+
+  lastText = text;
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+
+  addMsg('user', text);
+  const thinking = showThinking();
+
+  await new Promise(r => setTimeout(r, 800));
+
+  const result = classify(text);
+  const locId  = extractLocation(text);
+
+  // Remove thinking
+  thinking.remove();
+
+  // Fill form
+  document.getElementById('fTitle').value = result.title;
+  document.getElementById('fTitle').classList.add('populated');
+
+  document.getElementById('fDesc').value = result.desc;
+  document.getElementById('fDesc').classList.add('populated');
+
+  document.getElementById('fType').value = result.type;
+
+  if (locId) {
+    setLocById(locId);
+  }
+
+  document.getElementById('fCategory').value = result.cat;
+  document.getElementById('fCategory').classList.add('populated');
+
+  setBadge('urgGroup', result.urg);
+  setBadge('impGroup', result.imp);
+  setBadge('priGroup', result.pri);
+
+  const urgLabels = {5:'Muito Baixa',4:'Baixa',3:'Média',2:'Alta',1:'Muito Alta'};
+  const impLabels = {5:'Muito Baixo',4:'Baixo',3:'Médio',2:'Alto',1:'Muito Alto'};
+  const catName = CATEGORIES.find(c => c.id === result.cat)?.name || 'categoria selecionada';
+  const locObj  = locId ? LOCATIONS.find(l => l.id === locId) : null;
+  const locName = locObj ? locObj.completename : null;
+
+  let botMsg = `✅ <b>Chamado preenchido!</b><br><br>
+📌 <b>Título:</b> ${result.title}<br>
+📂 <b>Categoria:</b> ${catName}<br>
+⚡ <b>Urgência:</b> ${urgLabels[result.urg]} · <b>Impacto:</b> ${impLabels[result.imp]}<br>`;
+
+  if (locName) {
+    botMsg += `📍 <b>Localização:</b> ${locName}<br>`;
+  } else {
+    botMsg += `📍 <b>Localização:</b> <em>Busque o setor no campo acima</em><br>`;
+  }
+
+  botMsg += `<br>Confira os campos, ajuste se necessário, e clique em <b>Abrir Chamado</b>. Ou me diga mais detalhes para refinar!`;
+
+  addMsg('bot', botMsg);
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// ============================================================
+// Submit ticket
+// ============================================================
+async function submitTicket() {
+  const title = document.getElementById('fTitle').value.trim();
+  const desc  = document.getElementById('fDesc').value.trim();
+
+  if (!title) return showToast('⚠️ Preencha o título do chamado.');
+  if (!desc)  return showToast('⚠️ Preencha a descrição do chamado.');
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Abrindo chamado...';
+  document.getElementById('offlineBanner').classList.remove('show');
+
+  const urgLabels = {5:'Muito Baixa',4:'Baixa',3:'Média',2:'Alta',1:'Muito Alta'};
+  const impLabels = {5:'Muito Baixo',4:'Baixo',3:'Médio',2:'Alto',1:'Muito Alto'};
+  const typeLabel = document.getElementById('fType').value === '1' ? 'Incidente' : 'Requisição';
+  const catId  = document.getElementById('fCategory').value;
+  const catName = catId ? (CATEGORIES.find(c => c.id === parseInt(catId))?.name || catId) : 'Não definida';
+  const locId  = document.getElementById('fLocation').value;
+  const locName = locId ? (LOCATIONS.find(l => l.id === parseInt(locId))?.name || locId) : 'Não definida';
+  const urg = getBadgeVal('urgGroup');
+  const imp = getBadgeVal('impGroup');
+  const pri = getBadgeVal('priGroup');
+  const urgVal = urgLabels[urg];
+  const impVal = impLabels[imp];
+
+  // Add ITIL Metadata header to description as requested
+  let finalContent = `[ SEVERIDADE: ${urgVal} | URGÊNCIA: ${urgVal} | IMPACTO: ${impVal} ]\n`;
+  
+  const locManual = document.getElementById('locManual').value.trim();
+  if (locManual) {
+    finalContent += `LOCALIZAÇÃO INFORMADA: ${locManual}\n`;
+  }
+  
+  finalContent += `\n${desc}`;
+
+  const payload = {
+    name:           title,
+    content:        finalContent,
+    type:           parseInt(document.getElementById('fType').value),
+    urgency:        urg,
+    impact:         imp,
+    priority:       pri,
+    requesttypes_id: 1,
+    users_id_recipient: CONFIG.userId,
+    _users_id_requester: CONFIG.userId,
+    _users_id_observer:  CONFIG.n2GroupId,
+  };
+
+  if (locId) payload.locations_id = parseInt(locId);
+  if (catId) payload.itilcategories_id = parseInt(catId);
+
+  // Store ticket text for offline copy
+  window._offlineTicketText = [
+    `=== DADOS DO CHAMADO GLPI ===`,
+    `Título:      ${title}`,
+    `Tipo:        ${typeLabel}`,
+    `Categoria:   ${catName}`,
+    `Localização: ${locName}`,
+    `Urgência:    ${urgLabels[urg]}`,
+    `Impacto:     ${impLabels[imp]}`,
+    `Prioridade:  ${urgLabels[pri]}`,
+    `Requerente:  usuario.admin (ID 207)`,
+    `Observador:  Grupo N2 – Nivel 2 Atendimento Tecnico (ID 108)`,
+    ``,
+    `--- DESCRIÇÃO ---`,
+    desc,
+  ].join('\n');
+
+  try {
+    const ticketId = await createTicket(payload);
+
+    document.getElementById('resultNum').textContent = `#${ticketId}`;
+    document.getElementById('resultLink').href = `${CONFIG.glpiBase}/glpi/front/ticket.form.php?id=${ticketId}`;
+    document.getElementById('ticketResult').classList.add('show');
+
+    addMsg('bot', `🎉 <b>Chamado #${ticketId} aberto com sucesso!</b><br>Você foi definido como requerente e o grupo N2 como observador. <a href="${CONFIG.glpiBase}/glpi/front/ticket.form.php?id=${ticketId}" target="_blank" style="color:#22d3ee">Abrir no GLPI →</a>`);
+    showToast(`✅ Chamado #${ticketId} aberto!`, 'success');
+
+    btn.innerHTML = '<span>✅</span> Chamado Aberto!';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>🚀</span> Abrir Chamado no GLPI';
+    }, 5000);
+
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false;
+    btn.innerHTML = '<span>🚀</span> Tentar Novamente';
+
+    // Check if it looks like a network error
+    const isNetwork = err.message.toLowerCase().includes('failed to fetch')
+      || err.message.toLowerCase().includes('network')
+      || err.message.toLowerCase().includes('falha')
+      || err.message.toLowerCase().includes('sessão');
+
+    if (isNetwork) {
+      document.getElementById('offlineBanner').classList.add('show');
+      addMsg('bot', `🟡 <b>Sem conexão com o GLPI</b> — modo offline ativado.<br>Seus dados estão preservados no formulário. Clique em <b>copiar dados</b> e abra o GLPI manualmente quando a rede voltar.`);
+    } else {
+      showToast(`❌ Erro: ${err.message}`);
+      addMsg('bot', `⚠️ Não foi possível abrir o chamado: <em>${err.message}</em><br>Os dados foram preservados no formulário.`);
+    }
+  }
+}
+
+function copyTicket() {
+  const text = window._offlineTicketText || 'Nenhum dado disponível. Preencha o formulário primeiro.';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ Copiado!';
+    btn.classList.add('copied');
+    showToast('Dados copiados para a área de transferência!', 'success');
+    setTimeout(() => {
+      btn.textContent = '📋 Copiar dados do chamado';
+      btn.classList.remove('copied');
+    }, 3000);
+  }).catch(() => {
+    // Fallback para browsers sem clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Dados copiados!', 'success');
+  });
+}
+
+// ============================================================
+// Init
+// ============================================================
+populateDropdowns();
+</script>
+</body>
+</html>
